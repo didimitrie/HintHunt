@@ -44,11 +44,17 @@ body {
   perspective: 304px;
   background-color: white; }
 
+h3 {
+  text-transform: uppercase;
+  font-weight: 300;
+  font-size: 5vw; }
+
 p {
   font-size: 5vw;
   margin: 10px 0; }
 
 .flex-grid {
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -58,7 +64,8 @@ p {
   width: 100vw;
   height: 100vh;
   background-color: #FF63C7;
-  perspective: 450px; }
+  perspective: 0px;
+  trasnform-origin: center center; }
 
 .map {
   position: fixed;
@@ -72,8 +79,8 @@ p {
 
 .pin-overlay {
   position: absolute;
-  width: 24vw;
-  height: 24vw;
+  width: 23vw;
+  height: 23vw;
   top: calc(50% - 12vw);
   left: calc(50% - 12vw);
   border: 2px solid white;
@@ -81,16 +88,10 @@ p {
   font-size: 12px;
   color: white; }
 
-.crosshair {
-  color: #4c4c4c;
-  position: absolute;
-  top: calc(50% - 70px);
-  left: calc(50% - 21px); }
-
 .pin-details {
   position: absolute;
-  width: 100%;
-  height: 65%;
+  width: 100vw;
+  height: 100vh;
   top: 0;
   left: 0;
   trasnform-origin: bottom center;
@@ -101,37 +102,48 @@ p {
   .pin-details .input-controls {
     position: absolute;
     bottom: 10px;
-    left: 45%;
-    color: white;
+    color: black;
     text-align: center; }
+  .pin-details .close-input {
+    position: absolute;
+    width: 100vw;
+    text-align: center;
+    bottom: 5vh;
+    color: white;
+    text-shadow: 0px 0px 19px #c8c8c8;
+    font-size: 10vw;
+    display: none; }
   .pin-details .actions {
-    height: 100%;
-    width: 100%;
-    background-color: #ff63c7;
+    position: fixed;
+    left: 15vw;
+    bottom: 35vh;
+    height: 70vw;
+    width: 70vw;
+    background-color: white;
     box-shadow: 0px 9px 16px 0px rgba(50, 50, 50, 0.75);
-    border-radius: 20%;
-    color: white; }
+    color: black;
+    border-radius: 50%; }
   .pin-details .actions:after {
     content: '';
     position: absolute;
-    top: 100%;
+    top: 95%;
     left: 50%;
-    margin-left: -35px;
+    margin-left: -10vw;
     width: 0;
     height: 0;
-    border-top: solid 35px #FF63C7;
-    border-left: solid 35px transparent;
-    border-right: solid 35px transparent; }
+    border-top: solid 10vw white;
+    border-left: solid 10vw transparent;
+    border-right: solid 10vw transparent; }
   .pin-details .tip-input {
     height: 55px;
     width: 80vw;
     background-color: transparent;
     border-style: solid;
     border-width: 0px 0px 2px 0px;
-    border-color: white;
+    border-color: black;
     font-family: "Roboto", sans-serif;
     font-weight: 100;
-    color: white;
+    color: black;
     font-size: 25px;
     text-align: center;
     outline: 0; }
@@ -142,4 +154,27 @@ p {
   width: 10%;
   left: 45%;
   bottom: 0;
-  color: #FF63C7; }
+  color: white; }
+
+.route-review {
+  position: absolute;
+  top: 100vh;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(255, 255, 255, 0.9); }
+  .route-review .info-stuff {
+    display: inline-block;
+    font-size: 5vw;
+    font-weight: 400;
+    opacity: 0; }
+  .route-review .save-share {
+    display: block;
+    font-size: 25vw;
+    font-weight: 300; }
+  .route-review .round-numbers {
+    width: 20vw;
+    height: 20vw;
+    line-height: 20vw;
+    border: 1vw solid black;
+    border-radius: 50%;
+    margin-bottom: 5px; }

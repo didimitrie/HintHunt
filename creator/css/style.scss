@@ -5,6 +5,7 @@ $font-color: #212020;
 $accent-color: #ffa6d0;
 $font-family: 'Roboto', sans-serif;
 $bubble-radius: 24vw;
+$border-radius: 2vw;
 
 @mixin border-radius($radius) {
 	border-radius: $radius;
@@ -26,6 +27,19 @@ body{
 
 }
 
+h1{ 
+	//TODO
+}
+
+h2{
+	//TODO
+}
+
+h3 {
+	text-transform: uppercase;
+	font-weight: 300;
+	font-size: 5vw;
+}
 p {
 	font-size: 5vw;
 	margin: 10px 0;
@@ -36,6 +50,7 @@ section{
 }
 
 .flex-grid{
+	height:100%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -50,7 +65,8 @@ section{
 	width: 100vw;
 	height: 100vh;
 	background-color: $background-color;
-	perspective: 450px;	
+	perspective: 0px;	
+	trasnform-origin: center center;
 }
 
 .map{
@@ -67,33 +83,24 @@ section{
 
 .pin-overlay{
 	position: absolute;
-	width: $bubble-radius;
-	height: $bubble-radius;
+	width: $bubble-radius - $border-radius/2;
+	height: $bubble-radius - $border-radius/2;
 	
 	top: calc(50% - #{$bubble-radius/2});
 	left: calc(50% - #{$bubble-radius/2});
 	
-	//background-color: rgba($background-color, 0.3);
 	border: 2px solid white;
 	@include border-radius(50%);
- 
-    font-size: 12px;
-    color: white;
 
-}
+	font-size: 12px;
+	color: white;
 
-.crosshair {
-	color: #4c4c4c;
-	position: absolute;
-	
-	top: calc(50% - 70px);
-	left: calc(50% - 21px);
 }
 
 .pin-details {
 	position: absolute;
-	width: 100%;
-	height: 65%;
+	width: 100vw;
+	height: 100vh;
 	top: 0;
 	left: 0;
 	trasnform-origin: bottom center;
@@ -106,35 +113,48 @@ section{
 	.input-controls{
 		position: absolute;
 		bottom: 10px;	
-		left: 45%;
-		color: white;
+		color: black;
 		text-align: center;
 	}
 
-	.close-input {	
+	.close-input {
+		position: absolute;
+		width: 100vw;
+		text-align: center;
+		bottom: 5vh;
+		color: white;
+		text-shadow: 0px 0px 19px rgba(200, 200, 200, 1);
+		font-size: 10vw;
+		display: none;
 	}
 
 	.actions{
-		height: 100%;
-		width: 100%;
-		background-color: rgba($background-color, 1);
-		box-shadow:  0px 9px 16px 0px rgba(50, 50, 50, 0.75);
-		@include border-radius(20%);
+		position: fixed;
+		left: 15vw;
+		bottom: 35vh;
 
-		color: white;
+		height: 70vw;
+		width: 70vw;
+
+		background-color: white;
+		box-shadow:  0px 9px 16px 0px rgba(50, 50, 50, 0.75);
+
+
+		color: black;
+		@include border-radius(50%);
 	}
 
 	.actions:after {
-	    content:'';
-	    position: absolute;
-	    top: 100%;
-	    left: 50%;
-	    margin-left: -35px;
-	    width: 0;
-	    height: 0;
-	    border-top: solid 35px $background-color;
-	    border-left: solid 35px transparent;
-	    border-right: solid 35px transparent;
+		content:'';
+		position: absolute;
+		top: 95%;
+		left: 50%;
+		margin-left: -10vw;
+		width: 0;
+		height: 0;
+		border-top: solid 10vw white;
+		border-left: solid 10vw transparent;
+		border-right: solid 10vw transparent;
 	}
 
 
@@ -144,10 +164,10 @@ section{
 		background-color: transparent;  
 		border-style: solid;  
 		border-width: 0px 0px 2px 0px;  
-		border-color: white;
+		border-color: black;
 		font-family: $font-family;
 		font-weight: 100;
-		color: white;
+		color: black;
 		font-size: 25px;
 		text-align: center;
 		outline:0; 
@@ -162,7 +182,40 @@ section{
 	left: 45%;
 	bottom: 0;
 
-	color: $background-color;
+	color: white;
+}
+
+.route-review{
+	position: absolute;
+	top:100vh;
+
+	width:100vw;
+	height:100vh;
+
+	background-color: rgba(white, 0.9);
+
+	.info-stuff
+	{
+		display: inline-block;
+		font-size: 5vw;
+		font-weight: 400;
+		opacity: 0;
+	}
+
+	.save-share{
+		display: block;
+		font-size: 25vw;
+		font-weight: 300;
+	}
+
+	.round-numbers {
+		width: 20vw;
+		height: 20vw;
+		line-height: 20vw;
+		border: 1vw solid black;
+		@include border-radius(50%);
+		margin-bottom: 5px;
+	}
 }
 
 

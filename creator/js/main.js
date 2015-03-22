@@ -3,15 +3,18 @@ function getR(min, max) {
 }
 
 function closeControls() {
-	$(".pin-details").velocity("transition.shrinkOut", {duration:400, easing: [200,20], delay:0});
-	//$(".main").velocity({translateY:"0vh", XXXrotateX: "0deg", scale:1}, {duration: 200});
+	$(".pin-details").velocity("transition.slideUpOut", {duration:400});
+	$(".main").velocity({translateY:["0vh", "20vh"], scale:1}, {duration: 300});
+	$(".close-input").velocity("transition.flipXOut", {delay: 0, duration:0}).velocity({scale:1}, 0);
 
-	$(".tip-input").attr({'disabled': 'disabled'});
+	$(".pin-overlay").velocity({scale:1}, 200);
+	
 }
 
 function openControls() {
-	//$(".main").velocity({translateY:"23vh", XXXrotateX: "45deg", scale: 1.5}, {duration: 200});
-	$(".pin-details").velocity("transition.expandIn", {duration:300});
+	$(".main").velocity({translateY:["20vh", 0], scale: [2,1]}, {duration: 300});
+	$(".pin-details").velocity("transition.slideDownIn", {duration:300, delay:150});
+	$(".close-input").velocity("transition.flipXIn", {delay: 400}).velocity({scale: 1.6});
 }
 
 function addCoordsToPath(){
@@ -33,14 +36,13 @@ function addCoordsToPath(){
 	path.push(map.getCenter());
 
 	var locationObject = {
-		"tip" : $(".tip-input").val(),
+		"tip" : $(".tip-input").val()==="" ? " " : "blast", // UGLY
 		"location" : map.getCenter(),
 		"zoom" : map.getZoom()
 	}
 
 	myCoords.push(locationObject);
-	console.log(myCoords);
-
+	
 	$(".tip-input").val("");
 }
 
@@ -50,18 +52,32 @@ $(window).load(function(){
 
 	myFirebaseRef = new Firebase("https://hint-hunt.firebaseio.com");
 	//madness starts
+	
+	var state = "closed";
 
-	$(".tip-input").hammer().on("tap", function (event) {
-		$(this).removeAttr('disabled');
-		$(this).focus();
+	
+	$(".route-review").hammer().on("pandown", function(event){
+		console.log(event.gesture.deltaX);
 	});
 
+	/*
 
-	$(".savebutton").hammer().on("tap", function(){
-		var routes = myFirebaseRef.child("routes");
-		routes.push(myCoords);
+	OPEN REVIEW
 
+	*/
+
+	$(".save-route").hammer().on("tap", function(){
+		if(state==="closed") 
+		{
+			$(".route-review").velocity({translateY: "-100vh"}, {duration: 200});
+			$(".info-stuff").velocity("transition.flipXIn", {display:null, stagger:200, delay: 300});
+			state = "review";
+		}
+		
+		//var routes = myFirebaseRef.child("routes");
+		//routes.push(myCoords);
 	});
+
 
 	/*
 
@@ -69,11 +85,10 @@ $(window).load(function(){
 
 	*/
 
-	var state = "closed";
-
 	$(".close-input").hammer().on("tap", function(event) {
 		if(state==="open")
 		{
+			event.preventDefault();
 			closeControls();
 			addCoordsToPath();
 			state = "closed";
@@ -86,10 +101,10 @@ $(window).load(function(){
 
 	*/
 
-
-	$("#the-map").hammer().on("tap", function(event) {
+	$(".pin-details").hammer().on("tap", function(event) {
 		if(state==="open") 
 		{
+			event.preventDefault();
 			closeControls();
 			state = "closed";
 		}
@@ -102,7 +117,7 @@ $(window).load(function(){
 	*/
 
 	$(".pin-overlay").hammer().on("tap", function(event) {
-		$(this).velocity("callout.pulse");
+		$(this).velocity({scale:0.4}, 300);
 
 		$("#waypoint-number").html("#" + (myCoords.length+1));
 		$("#path-length").html("Length: " + (Math.round(traces.inKm()*100)/100)+"km" );
