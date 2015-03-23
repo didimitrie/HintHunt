@@ -1,0 +1,1 @@
+var hashids=new Hashids("this is my salt"),id=hashids.encode(45,434,1313,99);console.log(id);

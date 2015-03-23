@@ -2,7 +2,11 @@ function getR(min, max) {
 	return Math.random() * (max - min) + min;
 }
 
+var myFirebaseRef;
+
 $(window).load(function(){
+
+	myFirebaseRef = new Firebase("https://hint-hunt.firebaseio.com");
 
 	var directionsDisplay;
 	var directionsService = new google.maps.DirectionsService();

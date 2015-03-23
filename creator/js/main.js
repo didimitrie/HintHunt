@@ -127,6 +127,8 @@ $(window).load(function(){
 		var routes = myFirebaseRef.child("routes");
 		var myRef = routes.push(myCoords);
 
+		$(this).html(myRef.key());
+		$(this).css("font-size", "10px");
 		console.log(myRef.key());
 
 	});
