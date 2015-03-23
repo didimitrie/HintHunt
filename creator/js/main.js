@@ -2,6 +2,10 @@ function getR(min, max) {
 	return Math.random() * (max - min) + min;
 }
 
+function round(value, decimals) {
+    return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+}
+
 function closeControls() {
 	$(".pin-details").velocity("transition.slideUpOut", {duration:400});
 	$(".main").velocity({translateY:["0vh", "20vh"], scale:1}, {duration: 300});
@@ -14,7 +18,17 @@ function closeControls() {
 function openControls() {
 	$(".main").velocity({translateY:["20vh", 0], scale: [2,1]}, {duration: 300});
 	$(".pin-details").velocity("transition.slideDownIn", {duration:300, delay:150});
-	$(".close-input").velocity("transition.flipXIn", {delay: 400}).velocity({scale: 1.6});
+	$(".close-input").velocity("transition.flipXIn", {delay: 200}).velocity({scale: 1.6}, 200);
+}
+
+function closeReview() {
+	$(".route-review").velocity({translateY: "0vh"}, {duration: 400, easing:"easeOutQuint"});	
+	$(".info-stuff").velocity("transition.flipXOut", {display:null,duration:0});
+}
+
+function openReview() {
+	$(".route-review").velocity({translateY: "-100vh"}, {duration: 400, easing:"easeOutQuint"});
+	$(".info-stuff").velocity("transition.flipXIn", {display:null, stagger:100, delay: 300});
 }
 
 function addCoordsToPath(){
@@ -42,11 +56,19 @@ function addCoordsToPath(){
 	}
 
 	myCoords.push(locationObject);
-	
+
+	//update conclusions
+	var kms =  traces.inKm();
+
+	$(".stop-number").find(".round-numbers").html(myCoords.length);
+	$(".length").find(".round-numbers").html( round(kms,2) );
+	$(".duration").find(".round-numbers").html( round(kms/3, 2) );
+
 	$(".tip-input").val("");
 }
 
 var myFirebaseRef;
+var windowHeight = window.innerHeight;
 
 $(window).load(function(){
 
@@ -54,10 +76,24 @@ $(window).load(function(){
 	//madness starts
 	
 	var state = "closed";
-
 	
+	var drg = 0;
+
 	$(".route-review").hammer().on("pandown", function(event){
-		console.log(event.gesture.deltaX);
+		event.stopPropagation();
+		var dragOffset = ((100/windowHeight)*event.gesture.deltaY) - 100;
+		drg = -dragOffset;
+		$(this).velocity({translateY: dragOffset+"%"},0);
+	});
+
+	$(".route-review").hammer().on("panend", function(event) {
+		if(drg > 60) {
+			$(this).velocity({translateY: "-100vh"}, {duration: 200});
+		}
+		else {
+			closeReview();
+			state = "closed";
+		}
 	});
 
 	/*
@@ -69,8 +105,8 @@ $(window).load(function(){
 	$(".save-route").hammer().on("tap", function(){
 		if(state==="closed") 
 		{
-			$(".route-review").velocity({translateY: "-100vh"}, {duration: 200});
-			$(".info-stuff").velocity("transition.flipXIn", {display:null, stagger:200, delay: 300});
+			openReview();
+			deltaY = 0;
 			state = "review";
 		}
 		
@@ -78,6 +114,22 @@ $(window).load(function(){
 		//routes.push(myCoords);
 	});
 
+
+
+	/*
+
+	CONFIRM ROUTE
+
+	*/
+
+	$(".save-share").hammer().on("tap", function() {
+
+		var routes = myFirebaseRef.child("routes");
+		var myRef = routes.push(myCoords);
+
+		console.log(myRef.key());
+
+	});
 
 	/*
 
@@ -104,12 +156,12 @@ $(window).load(function(){
 	$(".pin-details").hammer().on("tap", function(event) {
 		if(state==="open") 
 		{
-			event.preventDefault();
+			event.stopPropagation();
 			closeControls();
 			state = "closed";
 		}
 	});
-
+	$(".actions").hammer().on("tap", function(event) {event.preventDefault();});
 	/*
 
 	OPEN
