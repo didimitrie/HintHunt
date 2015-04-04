@@ -3,7 +3,7 @@ function getR(min, max) {
 }
 
 function round(value, decimals) {
-    return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+	return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
 }
 
 function closeControls() {
@@ -31,6 +31,39 @@ function openReview() {
 	$(".info-stuff").velocity("transition.flipXIn", {display:null, stagger:100, delay: 300});
 }
 
+function openTipInput(){
+	$(".tip-input").velocity({translateY: "100%"}, {duration: 400, easing:"easeOutQuint", complete: function(){
+		$("input").focus();	
+	}});
+}
+
+function closeTipInput()
+{
+	$(".tip-input").velocity({translateY: "-100%"}, {duration: 400, easing:"easeOutQuint"});
+	$("input").blur();	
+}
+
+function openTipEdit(pos){
+	var myTip;
+	var index;
+
+	for(var i = 0; i<myCoords.length; i++) {
+		var loc = myCoords[i].location;
+		if((pos.k === loc.k)&&(pos.D===loc.D)){
+			myTip = myCoords[i];
+			index = i;
+		}
+	}
+
+	console.log("Found! Tip #" + index);
+
+	$("#tip-delete").velocity({translateY: "100vh"}, {duration: 600, easing:[200,20]});
+}
+
+function closeTipDelete() {
+	$("#tip-delete").velocity({translateY: "-100vh"}, {duration: 600, easing:[200,20]});	
+}
+
 function addCoordsToPath(){
 	var marker = new google.maps.Marker({
 		position: map.getCenter(),
@@ -41,21 +74,24 @@ function addCoordsToPath(){
 		}
 	});
 
-	google.maps.event.addListener(marker, 'click', function() {
-		map.setZoom(map.getZoom());
-		map.panTo(marker.getPosition());
-	});
-
 	var path = traces.getPath();
 	path.push(map.getCenter());
 
+	var tip = $("#add-tip").html();
+
 	var locationObject = {
-		"tip" : $(".tip-input").val()==="" ? " " : "blast", // UGLY
-		"location" : map.getCenter(),
-		"zoom" : map.getZoom()
+		tip : tip,
+		location : map.getCenter(),
+		zoom : map.getZoom()
 	}
 
 	myCoords.push(locationObject);
+
+	google.maps.event.addListener(marker, 'click', function() {
+		openTipEdit(marker.getPosition());
+		map.setZoom(map.getZoom());
+		map.panTo(marker.getPosition());
+	});
 
 	//update conclusions
 	var kms =  traces.inKm();
@@ -64,21 +100,75 @@ function addCoordsToPath(){
 	$(".length").find(".round-numbers").html( round(kms,2) );
 	$(".duration").find(".round-numbers").html( round(kms/3, 2) );
 
-	$(".tip-input").val("");
+	$(".tip-input-form").val("");
+	$("#add-tip").html("add tip?");
+}
+
+function makeThingsStick()
+{
+	$("section").css("height", windowHeight + "px");
 }
 
 var myFirebaseRef;
-var windowHeight = window.innerHeight;
+var windowHeight;
 
 $(window).load(function(){
+
+	windowHeight = window.innerHeight;
+	windowWidth = window.innerWidth;
+	//makeThingsStick();
 
 	myFirebaseRef = new Firebase("https://hint-hunt.firebaseio.com");
 	//madness starts
 	
 	var state = "closed";
-	
-	var drg = 0;
 
+	/*
+
+	DELETE/EDIT location inside gmap marker handler
+
+	*/
+	
+	/*
+
+	CLOSE LOCATION INPUTa
+
+	*/
+
+	var drgX, drgY;
+
+	$(".pin-details").hammer().on("pan", function(event){
+		event.stopPropagation();
+		
+		var dragX, dragY, pX, pY;
+		
+		dragX = event.gesture.deltaX/10;
+		dragY = event.gesture.deltaY/10;
+
+		pX = event.gesture.pointers[0].pageX;
+		pY = event.gesture.pointers[0].pageY;
+
+		console.log(event);
+
+		$(this).css("left", pX - windowWidth/2);
+		$(this).css("top", pY - windowHeight/2);
+
+		//var dragOffset = ((100/windowHeight)*event.gesture.deltaY) - 100;
+		
+		//$(this).velocity({translateX: dragX + "px", translateY: "+=" + dragY + "px"},0);
+	});
+
+	$(".pin-details").hammer().on("panend", function(event) {
+	
+	});
+
+	/*
+
+	CLOSE REVIEW
+
+	*/
+
+	var drg = 0;
 	$(".route-review").hammer().on("pandown", function(event){
 		event.stopPropagation();
 		var dragOffset = ((100/windowHeight)*event.gesture.deltaY) - 100;
@@ -124,12 +214,13 @@ $(window).load(function(){
 
 	$(".save-share").hammer().on("tap", function() {
 
+		//TODO: pushRefToDb();
+
 		var routes = myFirebaseRef.child("routes");
 		var myRef = routes.push(myCoords);
 
 		$(this).html(myRef.key());
-		$(this).css("font-size", "10px");
-		console.log(myRef.key());
+		$(this).css("font-size", "16px");
 
 	});
 
@@ -158,12 +249,13 @@ $(window).load(function(){
 	$(".pin-details").hammer().on("tap", function(event) {
 		if(state==="open") 
 		{
-			event.stopPropagation();
-			closeControls();
-			state = "closed";
+			//event.stopPropagation();
+			//closeControls();
+			//state = "closed";
 		}
 	});
-	$(".actions").hammer().on("tap", function(event) {event.preventDefault();});
+
+	//$(".actions").hammer().on("tap", function(event) {event.preventDefault();});
 	/*
 
 	OPEN
@@ -182,6 +274,41 @@ $(window).load(function(){
 			state = "open";
 		}
 	});
+
+	/*
+
+	OPEN TIP INPUT
+
+	*/
+
+	$("#add-tip").hammer().on("tap", function(event){
+		openTipInput();
+	});
+
+	/*
+
+	HANDLE SUBMISSION OR BACK?
+
+	*/
+
+	$('#tip-form').on('submit', function(e) { 
+		e.preventDefault();
+		var data = $(".tip-input-form").val();
+        console.log(data); //use the console for debugging, F12 in Chrome, not alerts
+        $("#add-tip").html(data);
+        closeTipInput();
+    });
+
+   	/*
+
+	HANDLE SUBMISSION OR BACK?
+
+	*/
+
+	$(".close-tip-delete").hammer().on("tap", function() {
+		closeTipDelete();
+	});
+
 
 	show_map2();
 	//navigator.geolocation.getCurrentPosition(show_map, error, {maximumAge: 500});
