@@ -38,7 +38,7 @@ section{
 	width: 90vw;
 	height: 90vw;
 	box-shadow: 0px -10px 36px 2px rgba(20,20,20,1);
-	@include border-radius(50%);
+	//@include border-radius(50%);
 }
 
 .cell-overlay{
@@ -49,5 +49,5 @@ section{
 	height: 96vw;
 	box-shadow: inset 0px 0px 73px 43px  rgba(51,51,51,1);
 	pointer-events: none;
-	@include border-radius(50%);
+	//@include border-radius(50%);
 }

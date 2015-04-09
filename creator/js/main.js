@@ -159,7 +159,7 @@ $(window).load(function(){
 	});
 
 	$(".pin-details").hammer().on("panend", function(event) {
-	
+
 	});
 
 	/*
@@ -199,9 +199,6 @@ $(window).load(function(){
 			deltaY = 0;
 			state = "review";
 		}
-		
-		//var routes = myFirebaseRef.child("routes");
-		//routes.push(myCoords);
 	});
 
 
@@ -214,15 +211,38 @@ $(window).load(function(){
 
 	$(".save-share").hammer().on("tap", function() {
 
-		//TODO: pushRefToDb();
 
-		var routes = myFirebaseRef.child("routes");
-		var myRef = routes.push(myCoords);
+		//	Logic: 
+		//	1) increment counter
+		// 	2) on success, push the route with its shortlink
+		// 	3) profit! 
 
-		$(this).html(myRef.key());
-		$(this).css("font-size", "16px");
+	var element = $(this);
 
+	var routes = myFirebaseRef.child("routes");
+
+	var myCount;
+	var countRef = myFirebaseRef.child("count");
+
+	countRef.transaction(function(currentValue) {
+		return currentValue + 1;
+
+	}, function(err, commited, snapshot) {
+
+		myCount = parseInt(snapshot.val());
+		var hashids = new Hashids("hinthunt", 4, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+		
+		var id = hashids.encode(myCount);
+		var myRef = routes.child(id);
+		
+		myRef.set(myCoords);
+		
+		$(element).html(id);
 	});
+
+
+
+});
 
 	/*
 

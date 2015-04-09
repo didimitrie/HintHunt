@@ -1,1 +1,114 @@
-function getR(e,t){return Math.random()*(t-e)+e}var style=[{featureType:"administrative",stylers:[{visibility:"off"}]},{featureType:"landscape",stylers:[{visibility:"on"}]},{featureType:"poi",stylers:[{visibility:"off"}]},{featureType:"transit",stylers:[{visibility:"off"}]},{featureType:"water",stylers:[{visibility:"simplified"},{color:"#393939"}]},{elementType:"labels",stylers:[{visibility:"off"}]},{featureType:"road",elementType:"geometry.fill",stylers:[{color:"#ffffff"},{visibility:"on"}]},{featureType:"road",elementType:"geometry",stylers:[{color:"#bfbfbf"},{visibility:"on"}]},{featureType:"landscape",elementType:"geometry.fill",stylers:[{color:"#363636"},{visibility:"on"}]},{featureType:"landscape.man_made",stylers:[{color:"#363636"},{visibility:"off"}]}],myFirebaseRef;$(window).load(function(){function e(e){var t=e.coords.latitude,s=e.coords.longitude;o=new google.maps.DirectionsRenderer({polylineOptions:{strokeColor:"#ff6fcf",strokeOpacity:"0.7",strokeWeight:"10"}});var l=new google.maps.LatLng(t,s),a=new google.maps.LatLng(t+getR(-.01,.01),s+getR(-.01,.01)),n={scrollwheel:!0,zoom:13,center:l,panControl:!1,zoomControl:!1,mapTypeControl:!1,scaleControl:!1,streetViewControl:!1,overviewMapControl:!1,draggable:!0,mapTypeId:google.maps.MapTypeId.ROADMAP};r=new google.maps.Map(document.getElementById("the-map"),n),r.setOptions({styles:style}),o.setMap(r);var y={origin:l,destination:a,travelMode:google.maps.TravelMode.WALKING};i.route(y,function(e,t){t==google.maps.DirectionsStatus.OK&&o.setDirections(e)})}function t(){alert(r.getCenter())}myFirebaseRef=new Firebase("https://hint-hunt.firebaseio.com");var o,i=new google.maps.DirectionsService,r,s;navigator.geolocation.getCurrentPosition(e,t,{maximumAge:500})});
+var style = [{"stylers":[{"hue":"#ff1a00"},{"invert_lightness":true},{"saturation":-100},{"lightness":33},{"gamma":0.9}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#2D333C"}]}];
+
+function getR(min, max) {
+	return Math.random() * (max - min) + min;
+}
+
+var myFirebaseUrl, locationHash;
+
+//mapsy stuff
+var directionsDisplay;
+var directionsService = new google.maps.DirectionsService();
+var map, geocoder;
+var watcher;
+
+//from firebase
+var TRACK;
+
+//which is my target?
+var target;
+var user;
+
+function locationFollow(position)
+{
+	var myPos = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+	user.setPosition(myPos);
+	map.panTo(myPos);
+
+	console.log("wow! change!");
+}
+
+function addMarkers()
+{
+	var length = TRACK.length;
+	for(var i = 0; i < length; i++)
+	{
+		var pos = new google.maps.LatLng(TRACK[i].location.k, TRACK[i].location.D);
+		console.log(pos);
+		var marker = new google.maps.Marker({
+			position: pos,
+			map: map,
+		});
+	}
+}
+
+function initMap(position)
+{	
+	var myPos = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+
+	var mapOptions = {
+		scrollwheel: true,
+		zoom:16,
+		center: myPos,
+		panControl: false,
+		zoomControl: false,
+		mapTypeControl: false,
+		scaleControl: false,
+		streetViewControl: false,
+		overviewMapControl: false,
+		draggable:true,
+		mapTypeId: google.maps.MapTypeId.ROADMAP
+	};
+
+	map = new google.maps.Map(document.getElementById("the-map"), mapOptions);
+	map.setOptions({styles: style});
+
+	target = TRACK[0].location;
+	
+	user = new google.maps.Marker({
+		position: myPos,
+		map: map,
+		icon: {
+			path: google.maps.SymbolPath.CIRCLE,
+			scale: 5
+		}
+	});
+
+	addMarkers();
+}
+
+
+
+$(window).load(function(){
+
+	function error(){
+		alert("no worky worky");
+	}
+
+	/*
+	
+	GET DATA FROM FIREBASE, PARSE, AND SHOW MAP
+
+	*/
+
+	locationHash = window.location.hash.substring(1);
+	myFirebaseUrl = "https://hint-hunt.firebaseio.com/routes/"+locationHash+".json";
+
+	$.ajax({
+		url: myFirebaseUrl,
+		beforeSend: function( xhr ) {
+			xhr.overrideMimeType( "text/plain; charset=x-user-defined" );
+		}
+	})
+	.done(function(receivedData) {
+		TRACK = JSON.parse(receivedData);
+		
+		navigator.geolocation.getCurrentPosition(initMap, error, {maximumAge: 500});
+
+		watcher = navigator.geolocation.watchPosition(locationFollow, error, { enableHighAccuracy: true, timeout: 200, maximumAge: 0 });
+
+	});
+
+
+});
+
